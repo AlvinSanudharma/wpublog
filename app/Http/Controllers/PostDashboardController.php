@@ -38,6 +38,13 @@ class PostDashboardController extends Controller
      */
     public function store(Request $request)
     {
+        // NOTE: Validation
+        $request->validate([
+            'title' => 'required',
+            'category_id' => 'required',
+            'body' => 'required',
+        ]);
+
         Post::create([
             'title' => $request->title,
             'author_id' => Auth::user()->id,
