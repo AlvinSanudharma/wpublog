@@ -14,6 +14,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- CSS Stacks --}}
+    @stack('style')
 </head>
 
 <body class="font-sans antialiased">
@@ -34,8 +37,11 @@
             {{ $slot }}
         </main>
     </div>
+    {{-- Flowbite --}}
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
+    {{-- Javascript Stack --}}
+    @stack('script')
 </body>
 
 </html>

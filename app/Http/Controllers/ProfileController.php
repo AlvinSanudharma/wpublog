@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -27,27 +28,37 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        // $request->user()->fill($request->validated());
         $validated = $request->validated();
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
-        if ($request->hasFile('avatar')) {
+
+        if ($request->avatar) {
             if (!empty($request->user()->avatar)) {
                 Storage::disk('public')->delete($request->user()->avatar);
             }
 
-           $path = $request->file('avatar')->store('img', 'public');
+            $newFileName = Str::after($request->avatar, 'tmp/');
 
-           $validated['avatar'] =$path;
+            Storage::disk('public')->move($request->avatar, "img/$newFileName");
+
+            $validated['avatar'] = "img/$newFileName";
         }
 
-        // $request->user()->save();
         $request->user()->update($validated);
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function upload(Request $request)
+    {
+        if ($request->hasFile('avatar')) {
+           $path = $request->file('avatar')->store('tmp', 'public');
+        }
+
+        return $path;
     }
 
     /**

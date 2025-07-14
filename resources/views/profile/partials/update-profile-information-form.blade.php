@@ -1,3 +1,10 @@
+@push('style')
+    {{-- Filepond --}}
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    {{-- Image Preview --}}
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet" />
+@endpush
+
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
@@ -58,27 +65,63 @@
         </div>
 
         {{-- Upload avatar --}}
-        <div x-data="{ imgPreview: null }">
+        <div x-data="{
+            init() {
+                FilePond.registerPlugin(FilePondPluginImagePreview);
+                FilePond.registerPlugin(FilePondPluginFileValidateType);
+                FilePond.registerPlugin(FilePondPluginFileValidateSize);
+                FilePond.registerPlugin(FilePondPluginImageTransform);
+                FilePond.registerPlugin(FilePondPluginImageResize);
+        
+                const pond = FilePond.create($refs.avatar, {
+                        acceptedFileTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+                        maxFileSize: '2MB',
+                        imageResizeTargetWidth: '600',
+                        imageResizeMode: 'contain',
+                        imageResizeUpscale: false,
+                        server: {
+                            url: '/upload',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            load: (source, load, error, progress, abort, headers) => {
+                                fetch(source)
+                                    .then(res => res.blob())
+                                    .then(load)
+                                    .catch(error);
+                            }
+                        },
+                        files: [{
+                            source: '{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('img/default-avatar.png') }}',
+                            options: {
+                                type: 'local'
+                            }
+                        }]
+                    }
+        
+                )
+            }
+        }">
             <div>
                 <label class="block mb-2 text-sm font-medium text-gray-800 dark:text-white" for="avatar">Upload
                     avatar</label>
-                <input @change="imgPreview = URL.createObjectURL($event.target.files[0])"
+                <input x-ref="avatar"
                     class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                     aria-describedby="avatar_help" id="avatar" type="file" name="avatar"
                     accept="image/png, image/jpg, image/jpeg">
                 <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="avatar_help">.png or .jpg</div>
-                @error('avatar')
+                {{-- @error('avatar')
                     <p class="mt-2 text-xs text-red-600 dark:text-red-500"><span class="font-medium">{{ $message }}</p>
-                @enderror
+                @enderror --}}
             </div>
 
 
-            <div>
+            {{-- <div>
                 <img class="w-20 h-20 rounded-full"
                     :src="imgPreview ? imgPreview :
                         '{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('img/default-avatar.png') }}'"
                     alt="{{ $user->name }}">
-            </div>
+            </div> --}}
         </div>
 
         <div class="flex items-center gap-4">
@@ -91,3 +134,12 @@
         </div>
     </form>
 </section>
+
+@push('script')
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.js"></script>
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+@endpush
