@@ -1,3 +1,7 @@
+@push('style')
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+@endpush
+
 <!-- Modal content -->
 <div class="max-w-4xl relative p-4 bg-white rounded-lg border dark:bg-gray-800 sm:p-5">
     <!-- Modal header -->
@@ -25,7 +29,16 @@
         </div>
     @endif --}}
     <!-- Modal body -->
-    <form action="/dashboard" method="POST">
+    <form action="/dashboard" method="POST" x-data="{
+        init() { const quill = new Quill($refs.editor, { theme: 'snow', placeholder: 'Write post body here' }); },
+            submitForm() {
+                const content = $refs.editor.children[0].innerHTML;
+    
+                $refs.body.value = content
+    
+                this.$refs.postForm.submit()
+            }
+    }" @submit.prevent="submitForm" x-ref="postForm">
         @csrf
         <div class="mb-4">
             <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
@@ -51,12 +64,15 @@
         </div>
         <div class="mb-4"><label for="body"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tulisan</label>
-            <textarea id="body" name="body" rows="4"
-                class="@error('body') bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500 @enderror  block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            <textarea id="body" x-ref="body" name="body" rows="4"
+                class="hidden @error('body') bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500 @enderror  block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 placeholder="Write post body here">{{ old('body') }}</textarea>
+            <div x-ref="editor">
+            </div>
             @error('body')
                 <p class="mt-2 text-xs text-red-600 dark:text-red-500"><span class="font-medium">{{ $message }}</p>
             @enderror
+
         </div>
         <div class="flex gap-2">
             <button type="submit"
@@ -76,3 +92,7 @@
         </div>
     </form>
 </div>
+
+@push('script')
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+@endpush
