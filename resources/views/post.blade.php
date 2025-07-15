@@ -35,7 +35,7 @@
 
                                 </a>
                                 <p class="text-base text-gray-500 dark:text-gray-400">
-                                    {{ $post->category->created_at->diffForHumans() }}
+                                    {{ $post->created_at->diffForHumans() }}
                                 </p>
                             </div>
                         </div>
