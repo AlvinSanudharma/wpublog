@@ -33,8 +33,8 @@ class ProfileController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-
-        if ($request->avatar && Str::contains($request->avatar, 'tmp')) {
+        
+        if ($request->avatar && Str::contains($request->avatar, 'tmp/')) {
             if (!empty($request->user()->avatar)) {
                 Storage::disk(config('filesystems.default_public_disk'))->delete($request->user()->avatar);
             }
